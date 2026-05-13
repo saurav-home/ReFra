@@ -2,9 +2,13 @@ name: Release CI
 
 on: workflow_dispatch
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   build_nomaps:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       versionCode: ${{ steps.versioncode.outputs.versionCode }}
       versionName: ${{ steps.versionname.outputs.versionName }}
@@ -56,8 +60,7 @@ jobs:
           path: app/build/outputs/apk-renamed/**/*.apk
 
   build_nomaps_withml:
-    needs: build_nomaps
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - name: Strip internet permission
@@ -100,8 +103,7 @@ jobs:
           path: app/build/outputs/apk-renamed/**/*.apk
 
   build_maps:
-    needs: build_nomaps_withml
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       versionCode: ${{ steps.versioncode.outputs.versionCode }}
       versionName: ${{ steps.versionname.outputs.versionName }}
@@ -178,7 +180,7 @@ jobs:
 
   release:
     needs: [build_nomaps, build_nomaps_withml, build_maps]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
         with:
