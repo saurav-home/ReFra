@@ -5,6 +5,10 @@ on:
    branches:
     - nightly
 
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
@@ -12,6 +16,7 @@ defaults:
 jobs:
   build_nomaps:
     runs-on: self-hosted
+    timeout-minutes: 90
     outputs:
       versionCode: ${{ steps.versioncode.outputs.versionCode }}
       versionName: ${{ steps.versionname.outputs.versionName }}
@@ -27,17 +32,6 @@ jobs:
         run: chmod +x ./strip_permission.sh && ./strip_permission.sh
       - name: Disable maps
         run: echo "INCLUDE_MAPS=false" >> ./app.properties
-      - uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          cache: 'gradle'
-          java-version: 21
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
       - name: Decode Keystore
         id: decode_keystore
         uses: timheuer/base64-to-file@v1
@@ -47,7 +41,7 @@ jobs:
           encodedString: ${{ secrets.SIGNING_KEY }}
       - name: Build Release APK
         run: >-
-          ./gradlew
+          ./gradlew --no-daemon
           :app:assembleArm64-v8aNoMLRelease
           :app:assembleArmeabi-v7aNoMLRelease
           :app:assembleX86_64NoMLRelease
@@ -63,24 +57,15 @@ jobs:
           path: app/build/outputs/apk-renamed/**/*.apk 
 
   build_nomaps_withml:
+    needs: build_nomaps
     runs-on: self-hosted
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
       - name: Strip internet permission
         run: chmod +x ./strip_permission.sh && ./strip_permission.sh
       - name: Disable maps
         run: echo "INCLUDE_MAPS=false" >> ./app.properties
-      - uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          cache: 'gradle'
-          java-version: 21
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-      - name: Make Gradle executable
-        run: chmod +x ./gradlew
       - name: Decode Keystore
         id: decode_keystore
         uses: timheuer/base64-to-file@v1
@@ -90,7 +75,7 @@ jobs:
           encodedString: ${{ secrets.SIGNING_KEY }}
       - name: Build Release APK
         run: >-
-          ./gradlew
+          ./gradlew --no-daemon
           :app:assembleArm64-v8aWithMLRelease
           :app:assembleArmeabi-v7aWithMLRelease
           :app:assembleX86_64WithMLRelease
@@ -106,7 +91,9 @@ jobs:
           path: app/build/outputs/apk-renamed/**/*.apk
 
   build_maps:
+    needs: build_nomaps_withml
     runs-on: self-hosted
+    timeout-minutes: 90
     outputs:
       versionCode: ${{ steps.versioncode.outputs.versionCode }}
       versionName: ${{ steps.versionname.outputs.versionName }}
@@ -118,15 +105,6 @@ jobs:
       - name: Get versionName
         id: versionname
         run: echo "versionName=$(grep -E '^\s+versionName\s*=' app/build.gradle.kts | head -1 | awk -F\" '{ print $2 }')" >> $GITHUB_OUTPUT
-      - uses: actions/setup-java@v5
-        with:
-          distribution: 'temurin'
-          cache: 'gradle'
-          java-version: 21
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
       - name: Make Gradle executable
         run: chmod +x ./gradlew
       - name: Decode Keystore
@@ -138,7 +116,7 @@ jobs:
           encodedString: ${{ secrets.SIGNING_KEY }}
       - name: Build Release APK
         run: >-
-          ./gradlew
+          ./gradlew --no-daemon
           :app:assembleArm64-v8aNoMLRelease
           :app:assembleArmeabi-v7aNoMLRelease
           :app:assembleX86_64NoMLRelease
@@ -156,28 +134,43 @@ jobs:
   release:
     needs: [build_nomaps, build_nomaps_withml, build_maps]
     runs-on: self-hosted
+    timeout-minutes: 15
+    env:
+      VERSION: ${{ needs.build_maps.outputs.versionName }}-${{ needs.build_maps.outputs.versionCode }}
     steps:
       - uses: actions/download-artifact@v5
         with:
           name: ReFra Release (No Maps)
+          path: artifacts/nomaps
       - uses: actions/download-artifact@v5
         with:
           name: ReFra Release (Maps)
+          path: artifacts/maps
       - uses: actions/download-artifact@v5
         with:
           name: ReFra Release (No Maps, WithML)
+          path: artifacts/withml
+      - name: List downloaded artifacts
+        run: find artifacts -name "*.apk" -type f | sort
       - name: Generate SHA256
-        run: echo "### Checksums" >> ${{ needs.build_maps.outputs.versionName }}-${{ needs.build_maps.outputs.versionCode }}-nightly-changelog.txt && find . -name "ReFra-*.apk" -type f -print0 | sort -z | xargs -r0 sha256sum | awk '{gsub(".*/", "", $2); print "**"$2"**:", "`"$1"`"} ' >> ${{ needs.build_maps.outputs.versionName }}-${{ needs.build_maps.outputs.versionCode }}-nightly-changelog.txt
+        run: |
+          CHANGELOG="${VERSION}-nightly-changelog.txt"
+          echo "### Checksums" >> "$CHANGELOG"
+          find artifacts -name "ReFra-*.apk" -type f | sort | while IFS= read -r apk; do
+            hash=$(sha256sum "$apk" | awk '{print $1}')
+            name=$(basename "$apk")
+            echo "**${name}**: \`${hash}\`" >> "$CHANGELOG"
+          done
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v3
         with:
-          name: ${{ needs.build_maps.outputs.versionName }}-${{ needs.build_maps.outputs.versionCode }} Nightly Release
-          body_path: ${{ needs.build_maps.outputs.versionName }}-${{ needs.build_maps.outputs.versionCode }}-nightly-changelog.txt
+          name: ${{ env.VERSION }} Nightly Release
+          body_path: ${{ env.VERSION }}-nightly-changelog.txt
           prerelease: true
-          tag_name: ${{ needs.build_maps.outputs.versionName }}-${{ needs.build_maps.outputs.versionCode }}-nightly
+          tag_name: ${{ env.VERSION }}-nightly
           target_commitish: ${{ github.sha }}
           files: |
-            ./**/ReFra-*.apk
+            artifacts/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
