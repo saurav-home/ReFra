@@ -1,0 +1,45 @@
+name: Build Signed Release APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Sign Prime APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Generate Temporary Keystore
+        # This creates a valid signature key directly on the GitHub server
+        run: |
+          keytool -genkey -v -keystore release.keystore -alias primekey -keyalg RSA -keysize 2048 -validity 10000 -storepass password -keypass password -dname "CN=Prime,O=Android,C=US"
+
+      - name: Build and Sign Release APK
+        # This builds the optimized app and applies the signature we just created
+        run: |
+          ./gradlew assembleArm64-v8aNoMLRelease \
+            -Dorg.gradle.jvmargs="-Xmx3g" \
+            -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/release.keystore \
+            -Pandroid.injected.signing.store.password=password \
+            -Pandroid.injected.signing.key.alias=primekey \
+            -Pandroid.injected.signing.key.password=password
+
+      - name: Upload Signed APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Prime-Signed-Release-APK
+          path: app/build/outputs/apk/**/*.apk
+
