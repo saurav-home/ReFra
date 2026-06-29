@@ -178,7 +178,7 @@ fun <T : Media> MediaImage(
                                 clipData,
                                 View.DragShadowBuilder(view),
                                 null,
-                                View.DRAG_FLAG_GLOBAL or View.DRAG_FLAG_GRANT_READ_URI_PERMISSION
+                                View.DRAG_FLAG_GLOBAL or View.DRAG_FLAG_GLOBAL_URI_READ
                             )
                         }
                     },
