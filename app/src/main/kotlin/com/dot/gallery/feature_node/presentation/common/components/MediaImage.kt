@@ -7,8 +7,6 @@ package com.dot.gallery.feature_node.presentation.common.components
 
 import android.content.ClipData
 import android.view.View
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -42,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -112,6 +109,7 @@ fun <T : Media> MediaImage(
     val cellState = LocalMediaCellState.current
     val selectionState: Boolean
     val selectedMedia: Set<Long>
+    
     if (cellState != null) {
         selectionState = cellState.selectionActive
         selectedMedia = cellState.selectedMedia
@@ -119,9 +117,11 @@ fun <T : Media> MediaImage(
         selectionState = selector.isSelectionActive.collectAsStateWithLifecycle().value
         selectedMedia = selector.selectedMedia.collectAsStateWithLifecycle().value
     }
+    
     val isSelected by rememberedDerivedState(selectionState, selectedMedia, media) {
         selectionState && media.id in selectedMedia
     }
+    
     val metadata by rememberedDerivedState(metadataState.value) {
         metadataState.value.metadataMap[media.id]
     }
@@ -131,6 +131,7 @@ fun <T : Media> MediaImage(
     val selectedShapeSize: Dp
     val strokeSize: Dp
     val strokeColor: Color
+    
     if (selectionState) {
         selectedSize = animateDpAsState(
             targetValue = if (isSelected) 12.dp else 0.dp,
@@ -160,37 +161,22 @@ fun <T : Media> MediaImage(
         strokeSize = 0.dp
         strokeColor = Color.Transparent
     }
+    
     val roundedShape = remember(selectedShapeSize) {
         RoundedCornerShape(selectedShapeSize)
     }
-        val context = LocalContext.current
+    
+    val context = LocalContext.current
     val view = LocalView.current
 
     Box(
         modifier = Modifier
             .clip(roundedShape)
-            .pointerInput(media) {
-                detectDragGesturesAfterLongPress(
-                    onDragStart = {
-                        if (!selectionState) {
-                            val clipData = ClipData.newUri(context.contentResolver, "Image", media.getUri())
-                            view.startDragAndDrop(
-                                clipData,
-                                View.DragShadowBuilder(view),
-                                null,
-                                View.DRAG_FLAG_GLOBAL or View.DRAG_FLAG_GLOBAL_URI_READ
-                            )
-                        }
-                    },
-                    onDrag = { _, _ -> }
-                )
-            }
             .combinedClickable(
                 enabled = canClick(),
                 onClick = {
                     if (selectionState) {
                         onItemSelect(media)
-                        
                     } else {
                         context.sketch.enqueue(
                             ImageRequest(context, media.getUri().toString()) {
@@ -205,9 +191,29 @@ fun <T : Media> MediaImage(
                     }
                 },
                 onLongClick = if (selectionState) {
-                    null // No long click action when selection is active
+                    if (isSelected) {
+                        {
+                            if (selectedMedia.size <= 5) {
+                                // Dragging is safe, proceed
+                                val clipData = ClipData.newUri(context.contentResolver, "Image", media.getUri())
+                                view.startDragAndDrop(
+                                    clipData,
+                                    View.DragShadowBuilder(), // Empty builder fixes the giant shadow
+                                    null,
+                                    View.DRAG_FLAG_GLOBAL or View.DRAG_FLAG_GLOBAL_URI_READ
+                                )
+                            } else {
+                                // Show the limit warning
+                                android.widget.Toast.makeText(
+                                    context,
+                                    "You can't share more than 5 items at once",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    } else null // Do nothing if long-pressing an unselected item during selection mode
                 } else {
-                    { onItemSelect(media) }
+                    { onItemSelect(media) } // Enter selection mode
                 }
             )
             .aspectRatio(aspectRatio)
