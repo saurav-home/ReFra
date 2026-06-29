@@ -394,11 +394,11 @@ fun SettingsAppHeaderCompact(
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))
             .padding(horizontal = 8.dp, vertical = 4.dp)
-    )
+        )
+    }
 }
 }
-}
-}
+
 @Preview
 @Composable
 fun Preview() {
