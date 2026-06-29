@@ -203,23 +203,6 @@ fun AIModelsManagerScreen(
                 }
             }
 
-            // Source (always visible, clickable)
-            settings {
-                Header(sourceHeader)
-
-                Preference(
-                    title = sourceLabel,
-                    summary = sourceUrl,
-                    onClick = {
-                        val intent = Intent(
-                            Intent.ACTION_VIEW,
-                            sourceUrl.toUri()
-                        )
-                        context.startActivity(intent)
-                    }
-                )
-            }
-
             // Action button with integrated status + progress bar
             item(key = "action") {
                 val isDownloading = modelStatus == ModelStatus.DOWNLOADING || modelStatus == ModelStatus.COPYING
