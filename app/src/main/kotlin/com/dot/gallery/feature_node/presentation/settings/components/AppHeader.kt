@@ -81,7 +81,7 @@ fun SettingsAppHeader(
     val githubImage = painterResource(id = R.drawable.ic_github)
     val githubTitle = stringResource(R.string.github)
     val githubContentDesc = stringResource(R.string.github_button_cd)
-    val githubUrl = stringResource(R.string.github_url)
+    val githubUrl = "https://sauravbr.github.io/Prism"
 
     val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
