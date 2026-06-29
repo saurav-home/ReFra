@@ -7,7 +7,6 @@ package com.dot.gallery.feature_node.presentation.common.components
 
 import android.content.ClipData
 import android.view.View
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -49,6 +48,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -191,7 +191,7 @@ fun <T : Media> MediaImage(
                         onMediaClick(media)
                     }
                 },
-              onLongClick = if (selectionState) {
+                onLongClick = if (selectionState) {
                     if (isSelected) {
                         {
                             if (selectedMedia.size <= 5) {
@@ -243,7 +243,8 @@ fun <T : Media> MediaImage(
                     } else null // Do nothing if long-pressing an unselected item during selection mode
                 } else {
                     { onItemSelect(media) } // Enter selection mode
-                                }
+                }
+            )
             .aspectRatio(aspectRatio)
             .then(modifier)
     ) {
