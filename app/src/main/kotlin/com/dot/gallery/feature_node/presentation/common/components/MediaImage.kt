@@ -5,6 +5,11 @@
 
 package com.dot.gallery.feature_node.presentation.common.components
 
+import android.content.ClipData
+import android.view.View
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -158,16 +163,34 @@ fun <T : Media> MediaImage(
     val roundedShape = remember(selectedShapeSize) {
         RoundedCornerShape(selectedShapeSize)
     }
-    val context = LocalContext.current
+        val context = LocalContext.current
+    val view = LocalView.current
 
     Box(
         modifier = Modifier
             .clip(roundedShape)
+            .pointerInput(media) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = {
+                        if (!selectionState) {
+                            val clipData = ClipData.newUri(context.contentResolver, "Image", media.getUri())
+                            view.startDragAndDrop(
+                                clipData,
+                                View.DragShadowBuilder(view),
+                                null,
+                                View.DRAG_FLAG_GLOBAL or View.DRAG_FLAG_GRANT_READ_URI_PERMISSION
+                            )
+                        }
+                    },
+                    onDrag = { _, _ -> }
+                )
+            }
             .combinedClickable(
                 enabled = canClick(),
                 onClick = {
                     if (selectionState) {
                         onItemSelect(media)
+                        
                     } else {
                         context.sketch.enqueue(
                             ImageRequest(context, media.getUri().toString()) {
