@@ -236,32 +236,7 @@ fun SettingsAppHeader(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = {
-                        scope.launch {
-                            supportState.show()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = .12f),
-                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = .12f),
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .weight(1f)
-                        .semantics {
-                            contentDescription = donateContentDesc
-                        }
-                ) {
-                    Icon(painter = donateImage, contentDescription = null)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = donateTitle)
-                }
+            ) {  
                 Button(
                     onClick = { uriHandler.openUri(githubUrl) },
                     colors = ButtonDefaults.buttonColors(
@@ -391,32 +366,10 @@ fun SettingsAppHeaderCompact(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FilledTonalButton(
-                    onClick = {
-                        scope.launch {
-                            supportState.show()
-                        }
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
-                        .semantics {
-                            contentDescription = donateContentDesc
-                        }
-                ) {
-                    Icon(
-                        painter = donateImage,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = donateTitle, style = MaterialTheme.typography.labelLarge)
-                }
-                FilledTonalButton(
                     onClick = { uriHandler.openUri(githubUrl) },
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
                         .height(44.dp)
                         .semantics {
                             contentDescription = githubContentDesc
@@ -428,28 +381,24 @@ fun SettingsAppHeaderCompact(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = githubTitle, style = MaterialTheme.typography.labelLarge)
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = appVersion,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .combinedClickable(
-                        onClick = {},
-                        onLongClick = {
-                            scope.launch { restoreSheetState.show() }
-                        }
-                    )
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-        }
-    }
-}
+            Text(text = githubTitle, style = MaterialTheme.typography.labelLarge)
+        } // This closes the GitHub button
+    } // This closes the Row
 
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Text(
+        text = appVersion,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    )
+}
+}
+}
+}
 @Preview
 @Composable
 fun Preview() {
