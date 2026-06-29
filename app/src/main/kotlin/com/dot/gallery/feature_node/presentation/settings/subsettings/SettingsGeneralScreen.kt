@@ -240,14 +240,6 @@ private fun GeneralListScreen(
             isChecked = allowVibrations,
             onCheck = onVibrationsChange,
             onClick = { onDetailClick(DETAIL_VIBRATIONS) },
-            screenPosition = Position.Middle
-        )
-
-        val appNamePref = rememberPreference(
-            appNameAlias,
-            title = stringResource(R.string.change_app_name),
-            summary = stringResource(R.string.change_app_name_summary),
-            onClick = { onDetailClick(DETAIL_APP_NAME) },
             screenPosition = Position.Bottom
         )
 
@@ -270,7 +262,7 @@ private fun GeneralListScreen(
 
         return remember(
             trashCanEnabledPref, trashConfirmationEnabledPref,
-            secureModePref, allowVibrationsPref, appNamePref,
+            secureModePref, allowVibrationsPref,
             vaultEncryptPref
         ) {
             mutableStateListOf<SettingsEntity>().apply {
@@ -282,7 +274,6 @@ private fun GeneralListScreen(
                 add(otherSectionPref)
                 add(secureModePref)
                 add(allowVibrationsPref)
-                add(appNamePref)
                 add(vaultSectionPref)
                 add(vaultEncryptPref)
             }
