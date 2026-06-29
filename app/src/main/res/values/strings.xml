@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ReFra</string>
+    <string name="app_name">Prism</string>
     <string name="app_name_gallery">Gallery</string>
     <string name="change_app_name">App name</string>
     <string name="change_app_name_summary">Change the app name shown on your launcher</string>
