@@ -88,7 +88,7 @@
         </activity>
 
         <activity-alias
-            android:name=".Launcher_ReFra"
+            android:name=".Launcher_Prism"
             android:label="@string/app_name"
             android:icon="@mipmap/ic_launcher"
             android:roundIcon="@mipmap/ic_launcher_round"
