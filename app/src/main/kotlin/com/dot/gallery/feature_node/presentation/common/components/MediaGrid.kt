@@ -1,6 +1,7 @@
 package com.dot.gallery.feature_node.presentation.common.components
 
 import androidx.compose.animation.AnimatedContentScope
+import com.dot.gallery.feature_node.domain.util.getUri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -381,15 +382,21 @@ private fun <T : Media> GridPinchZoomScope.MediaGridContentWithHeaders(
                             canClick = { canScroll },
                             onMediaClick = { onMediaClick(it) },
                             metadataState = metadataState,
-                            onItemSelect = {
-                                if (allowSelection) {
-                                    feedbackManager.vibrate()
-                                    selector.toggleSelectionById(
-                                        mediaState = mediaState.value,
-                                        mediaId = it.id
-                                    )
-                                }
-                            }
+                                onItemSelect = {
+                                    if (allowSelection) {
+                                        feedbackManager.vibrate()
+                                        selector.toggleSelectionById(
+                                            mediaState = mediaState.value,
+                                            mediaId = it.id
+                                        )
+                                    }
+                                },
+                                selectedMediaUris = mediaState.value.media
+                                    .mapNotNull { item -> (item as? MediaItem.MediaViewItem)?.media }
+                                    .filter { m -> selector.selectedMedia.value.contains(m.id) }
+                                    .map { m -> m.getUri() }
+                                    
+                                    
                         )
                     }
                 }
