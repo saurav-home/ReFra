@@ -104,6 +104,7 @@ fun <T : Media> MediaImage(
     canClick: () -> Boolean,
     onMediaClick: (T) -> Unit,
     onItemSelect: (T) -> Unit,
+    selectedMediaUris: List<android.net.Uri> = emptyList(),
 ) {
     val selector = LocalMediaSelector.current
     val cellState = LocalMediaCellState.current
@@ -190,15 +191,43 @@ fun <T : Media> MediaImage(
                         onMediaClick(media)
                     }
                 },
-                onLongClick = if (selectionState) {
+              onLongClick = if (selectionState) {
                     if (isSelected) {
                         {
                             if (selectedMedia.size <= 5) {
-                                // Dragging is safe, proceed
-                                val clipData = ClipData.newUri(context.contentResolver, "Image", media.getUri())
+                                // 1. Decide what to send: The list if provided, otherwise just this single image
+                                val urisToSend = if (selectedMediaUris.isNotEmpty()) {
+                                    selectedMediaUris
+                                } else {
+                                    listOf(media.getUri())
+                                }
+
+                                // 2. Create the base ClipData using the very first URI
+                                val clipData = ClipData.newUri(
+                                    context.contentResolver, 
+                                    "Media", 
+                                    urisToSend.first()
+                                )
+
+                                // 3. Loop through any remaining URIs and attach them to the payload
+                                for (i in 1 until urisToSend.size) {
+                                    clipData.addItem(ClipData.Item(urisToSend[i]))
+                                }
+                                
+                                // 4. Create the 1x1 invisible shadow to prevent Android from crashing
+                                val invisibleShadow = object : View.DragShadowBuilder() {
+                                    override fun onProvideShadowMetrics(
+                                        outShadowSize: android.graphics.Point,
+                                        outShadowTouchPoint: android.graphics.Point
+                                    ) {
+                                        outShadowSize.set(1, 1) 
+                                        outShadowTouchPoint.set(0, 0)
+                                    }
+                                }
+
                                 view.startDragAndDrop(
                                     clipData,
-                                    View.DragShadowBuilder(), // Empty builder fixes the giant shadow
+                                    invisibleShadow, 
                                     null,
                                     View.DRAG_FLAG_GLOBAL or View.DRAG_FLAG_GLOBAL_URI_READ
                                 )
@@ -214,8 +243,7 @@ fun <T : Media> MediaImage(
                     } else null // Do nothing if long-pressing an unselected item during selection mode
                 } else {
                     { onItemSelect(media) } // Enter selection mode
-                }
-            )
+                                }
             .aspectRatio(aspectRatio)
             .then(modifier)
     ) {
