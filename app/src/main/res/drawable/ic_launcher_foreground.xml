@@ -1,34 +1,54 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp"
-    android:height="108dp"
+    android:width="512dp"
+    android:height="512dp"
     android:viewportWidth="512"
     android:viewportHeight="512">
 
+    <!-- 1. Dark Circular Background Base -->
     <path
         android:pathData="M256,256m-240,0a240,240 0,1 1,480 0a240,240 0,1 1,-480 0"
         android:fillColor="#1E222A"/>
 
+    <!-- 2. Silver Outer Rounded Square Frame -->
     <path
-        android:pathData="M110,90h292c11,0 20,9 20,20v292c0,11 -9,20 -20,20H110c-11,0 -20,-9 -20,-20V110c0,-11 9,-20 20,-20Z"
+        android:pathData="M110,85 h292 c14,0 25,11 25,25 v292 c0,14 -11,25 -25,25 h-292 c-14,0 -25,-11 -25,-25 v-292 c0,-14 11,-25 25,-25 Z"
         android:strokeWidth="12"
         android:fillColor="#00000000">
         <aapt:attr name="android:strokeColor">
             <gradient 
-                android:startX="90" 
-                android:startY="90" 
-                android:endX="422" 
-                android:endY="422" 
+                android:startX="85" 
+                android:startY="85" 
+                android:endX="427" 
+                android:endY="427" 
                 android:type="linear">
                 <item android:offset="0.0" android:color="#FFFFFF"/>
-                <item android:offset="0.5" android:color="#A0A5AA"/>
-                <item android:offset="1.0" android:color="#606468"/>
+                <item android:offset="0.3" android:color="#D1D5DB"/>
+                <item android:offset="0.7" android:color="#8E9399"/>
+                <item android:offset="1.0" android:color="#4A4E52"/>
             </gradient>
         </aapt:attr>
     </path>
 
+    <!-- 3. Rose-Gold Monogram Path (Continuous Interlocking Line Geometry) -->
     <path
-        android:pathData="M110,320 C110,320 ... [Insert Your Precise Traced Path Coordinates Here] ... Z"
+        android:pathData="M115,295 
+                  C105,335 125,365 160,355 
+                  L240,265 
+                  L210,230 
+                  L150,300 
+                  L215,215 
+                  L256,270 
+                  L297,215 
+                  L380,315 
+                  C405,345 425,325 420,295 
+                  C415,265 375,185 320,185 
+                  C265,185 240,235 256,256 
+                  L290,295 
+                  L340,245 
+                  L310,215 
+                  L270,265 
+                  C285,320 330,365 375,345"
         android:strokeWidth="14"
         android:strokeLineCap="round"
         android:strokeLineJoin="round"
@@ -36,13 +56,14 @@
         <aapt:attr name="android:strokeColor">
             <gradient 
                 android:startX="120" 
-                android:startY="150" 
+                android:startY="185" 
                 android:endX="400" 
-                android:endY="380" 
+                android:endY="365" 
                 android:type="linear">
-                <item android:offset="0.0" android:color="#E5A982"/>
-                <item android:offset="0.5" android:color="#C48663"/>
-                <item android:offset="1.0" android:color="#845237"/>
+                <item android:offset="0.0" android:color="#F3C6A5"/>
+                <item android:offset="0.4" android:color="#D49B74"/>
+                <item android:offset="0.8" android:color="#A86F4C"/>
+                <item android:offset="1.0" android:color="#7A4424"/>
             </gradient>
         </aapt:attr>
     </path>
