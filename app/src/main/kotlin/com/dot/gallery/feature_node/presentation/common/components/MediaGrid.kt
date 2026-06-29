@@ -392,9 +392,9 @@ private fun <T : Media> GridPinchZoomScope.MediaGridContentWithHeaders(
                                     }
                                 },
                                 selectedMediaUris = mediaState.value.media
-                                    .mapNotNull { item -> (item as? MediaItem.MediaViewItem)?.media }
-                                    .filter { m -> selector.selectedMedia.value.contains(m.id) }
-                                    .map { m -> m.getUri() }
+                                    .mapNotNull { item -> (item as? MediaItem.MediaViewItem<*>)?.media }
+                                    .filter { media -> selector.selectedMedia.value.contains(media.id) }
+                                    .map { media -> media.getUri() }
                                     
                                     
                         )
