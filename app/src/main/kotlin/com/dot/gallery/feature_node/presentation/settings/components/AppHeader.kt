@@ -13,7 +13,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,9 +70,9 @@ fun SettingsAppHeader(
     onDismiss: (() -> Unit)? = null
 ) {
 
-    val appName = stringResource(id = R.string.app_name)
+    val appName = "Prism"
     val appVersion = remember { "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})" }
-    val appDeveloper = stringResource(R.string.app_dev, stringResource(R.string.app_dev_name))
+    val appDeveloper = "By Saurav"
 
     val donateImage = painterResource(id = R.drawable.ic_donate)
     val donateTitle = stringResource(R.string.donate)
