@@ -40,13 +40,13 @@ apkVersioning {
     flavorVersionCodes.set(abiVersionCodes)
     versionCodeMultiplier.set(10)
     outputFileName.set("{appName}-{versionName}-{versionCode}{suffix}-{ml}-{abi}-{buildType}")
-    variables.put("appName", "ReFra")
+    variables.put("appName", "Prism")
     val offlineSuffix = if (isOffline) "-offline" else ""
     variables.put("suffix", offlineSuffix)
 }
 
 android {
-    namespace = "com.prism.gallery"
+    namespace = "com.dot.gallery"
     compileSdk = 37
 
     defaultConfig {
