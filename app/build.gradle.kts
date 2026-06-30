@@ -41,6 +41,7 @@ apkVersioning {
     versionCodeMultiplier.set(10)
     outputFileName.set("{appName}-{versionName}-{versionCode}{suffix}-{ml}-{abi}-{buildType}")
     variables.put("appName", "Prism")
+    variables.put("app_name", "Prism")
     val offlineSuffix = if (isOffline) "-offline" else ""
     variables.put("suffix", offlineSuffix)
 }
@@ -61,7 +62,7 @@ android {
             useSupportLibrary = true
         }
         val offlinePrefix = if (isOffline) "-offline" else ""
-        base.archivesName.set("ReFra-${versionName}-$versionCode$offlinePrefix")
+        base.archivesName.set("Prism-${versionName}-$versionCode$offlinePrefix")
     }
 
     lint.baseline = file("lint-baseline.xml")
