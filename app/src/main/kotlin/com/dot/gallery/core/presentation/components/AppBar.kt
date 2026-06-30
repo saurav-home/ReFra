@@ -185,16 +185,13 @@ fun AppBarContainer(
             enter = slideInVertically { it * 2 },
             exit = slideOutVertically { it * 2 },
             content = {
-                val modifier = remember(useNavRail) {
-                    if (useNavRail) Modifier.requiredWidth((110 * bottomNavItems.size).dp)
-                    else Modifier.fillMaxWidth()
+                    GooglePhotosNavigationPill(
+                        navController = navController,
+                        navItems = bottomNavItems,
+                        currentBackStackEntry = backStackEntry.value
+                    )
                 }
-                GalleryNavBar(
-                    modifier = modifier,
-                    backStackEntry = backStackEntry,
-                    navigationItems = bottomNavItems,
-                    onClick = { navigate(navController, it) }
-                )
+                
             }
         )
     }
@@ -385,5 +382,98 @@ fun RowScope.GalleryNavBarItem(
             contentDescription = navItem.name,
             tint = selectedIconColor
         )
+    }
+}
+@Composable
+fun GooglePhotosNavigationPill(
+    navController: androidx.navigation.NavController,
+    navItems: List<com.dot.gallery.feature_node.presentation.util.NavigationItem>,
+    currentBackStackEntry: androidx.navigation.NavBackStackEntry?
+) {
+    val currentRoute = currentBackStackEntry?.destination?.route
+
+    androidx.compose.foundation.layout.Row(
+        modifier = androidx.compose.ui.Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+    ) {
+        // Main Pill Box Container
+        androidx.compose.foundation.layout.Row(
+            modifier = androidx.compose.ui.Modifier
+                .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f))
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
+        ) {
+            navItems.forEach { item ->
+                val isSelected = currentRoute == item.route
+                
+                androidx.compose.foundation.layout.Row(
+                    modifier = androidx.compose.ui.Modifier
+                        .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primaryContainer 
+                            else androidx.compose.ui.graphics.Color.Transparent
+                        )
+                        .androidx.compose.foundation.clickable(
+                            interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            if (currentRoute != item.route) {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        }
+                        .padding(horizontal = if (isSelected) 18.dp else 14.dp, vertical = 10.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+                ) {
+                    if (isSelected) {
+                        androidx.compose.material3.Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.name,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = androidx.compose.ui.Modifier.size(18.dp)
+                        )
+                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.width(8.dp))
+                    }
+                    
+                    androidx.compose.material3.Text(
+                        text = item.name,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer 
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Medium,
+                        fontSize = 14.androidx.compose.ui.unit.sp
+                    )
+                }
+            }
+        }
+        
+        // Floating Utility Button on the right
+        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.width(8.dp))
+        androidx.compose.foundation.layout.Box(
+            modifier = androidx.compose.ui.Modifier
+                .size(48.dp)
+                .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f))
+                .androidx.compose.foundation.clickable {
+                    // Navigate to your search screen
+                    navController.navigate(com.dot.gallery.feature_node.presentation.util.Screen.SearchScreen.route)
+                },
+            contentAlignment = androidx.compose.ui.Alignment.Center
+        ) {
+            androidx.compose.material3.Icon(
+                imageVector = androidx.compose.material.icons.Icons.Rounded.Search,
+                contentDescription = "Search",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = androidx.compose.ui.Modifier.size(22.dp)
+            )
+        }
     }
 }
