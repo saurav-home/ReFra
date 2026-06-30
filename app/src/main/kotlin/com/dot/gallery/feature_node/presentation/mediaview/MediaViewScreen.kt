@@ -1281,57 +1281,54 @@ val bottomSheetAlpha by animateFloatAsState(
                             color = surfaceContainer,
                             shape = RoundedCornerShape(100)
                         )
-                    } else Modifier
-                    Box(
-                        modifier = Modifier
-                            .graphicsLayer {
-                                val progress = sheetState.progress(imageOnlyDetent, expandedDetent)
-                                alpha = 1f - progress
-                                translationY =
-                                    bottomBarHeightDefault.toPx() * progress
-                            }
-                            .padding(
-                                bottom = bottomPadding + extraPaddingWithNavButtons + 16.dp
+                   Box(
+                modifier = Modifier
+                    .graphicsLayer {
+                        val progress = sheetState.progress(imageOnlyDetent, expandedDetent)
+                        alpha = 1f - progress
+                        translationY =
+                            bottomBarHeightDefault.toPx() * progress
+                    }
+                    .padding(
+                        bottom = bottomPadding + extraPaddingWithNavButtons + 16.dp
+                    )
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(100))
+                        .then(backgroundModifier)
+                        .hazeEffectScaled(
+                            state = LocalHazeState.current,
+                            style = HazeMaterials.ultraThin(
+                                containerColor = surfaceContainer
                             )
-                            .fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(100))
-                                .then(backgroundModifier)
-                                .hazeEffectScaled(
-                                    state = LocalHazeState.current,
-                                    style = HazeMaterials.ultraThin(
-                                        containerColor = surfaceContainer
-                                    )
-                                )
-                                .padding(horizontal = 8.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            MediaViewQuickBottomBar(
-                                currentMedia = currentMedia,
-                                showDeleteButton = !isReadOnly,
-                                enabled = showUI && sheetState.currentDetent == imageOnlyDetent,
-                                deleteMedia = deleteMedia,
-                                restoreMedia = restoreMedia,
-                                currentVault = currentVault,
-                                isImageDark = isBottomDark,
-                                autoContrast = autoContrast,
-                                onTrashConfirmed = {
-                                    val trashedId = currentMedia?.id
-                                    if (trashedId != null) {
-                                        val newPending = pendingTrashIds + trashedId
-                                        pendingTrashIds = newPending
-                                        val state = mediaState.value
-                                        val allItems = state.pagerMedia.ifEmpty { state.media }
-                                        val remaining = allItems.count { it.id !in newPending }
-                                        if (remaining <= 0 && !isStandalone) {
-                                            windowInsetsController.toggleSystemBars(show = true)
-                                            eventHandler.navigateUp()
-                                        }
-                                    }
+                        )
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    MediaViewQuickBottomBar(
+                        currentMedia = currentMedia,
+                        showDeleteButton = !isReadOnly,
+                        enabled = showUI && sheetState.currentDetent == imageOnlyDetent,
+                        deleteMedia = deleteMedia,
+                        restoreMedia = restoreMedia,
+                        currentVault = currentVault,
+                        isImageDark = isBottomDark,
+                        autoContrast = autoContrast,
+                        onTrashConfirmed = {
+                            val trashedId = currentMedia?.id
+                            if (trashedId != null) {
+                                val newPending = pendingTrashIds + trashedId
+                                pendingTrashIds = newPending
+                                val state = mediaState.value
+                                val allItems = state.pagerMedia.ifEmpty { state.media }
+                                val remaining = allItems.count { it.id !in newPending }
+                                if (remaining <= 0 && !isStandalone) {
+                                    windowInsetsController.toggleSystemBars(show = true)
+                                    eventHandler.navigateUp()
                                 }
                             )
                         }
@@ -1350,4 +1347,5 @@ val bottomSheetAlpha by animateFloatAsState(
             }
         }
     }
-    }
+}
+                        
