@@ -46,11 +46,11 @@ apkVersioning {
 }
 
 android {
-    namespace = "com.dot.gallery"
+    namespace = "com.prism.gallery"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.dot.gallery"
+        applicationId = "com.prism.gallery"
         minSdk = 29
         targetSdk = 37
         versionCode = 50303
