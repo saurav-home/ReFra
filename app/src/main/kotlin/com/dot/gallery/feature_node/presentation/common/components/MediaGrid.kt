@@ -91,6 +91,27 @@ fun <T : Media> GridPinchZoomScope.MediaGrid(
     animatedContentScope: AnimatedContentScope,
     onMediaClick: @DisallowComposableCalls (media: T) -> Unit
 ) {
+    // 1. Get context and access/create a small persistent settings file on the device
+val context = androidx.compose.ui.platform.LocalContext.current
+val prefs = androidx.compose.runtime.remember { 
+    context.getSharedPreferences("app_settings", android.content.Context.MODE_PRIVATE) 
+}
+
+// 2. Read the saved state (defaults to true for a first-time user)
+var showDragDropShowcase by androidx.compose.runtime.remember { 
+    androidx.compose.runtime.mutableStateOf(prefs.getBoolean("show_drag_drop_banner", true)) 
+}
+
+// 3. Show your premium banner if it hasn't been dismissed yet
+if (showDragDropShowcase) {
+    DragAndDropIntroDialog(
+        onDismiss = {
+            showDragDropShowcase = false
+            // Save 'false' permanently so it never pops up again
+            prefs.edit().putBoolean("show_drag_drop_banner", false).apply()
+        }
+    )
+}
     LaunchedEffect(gridState.isScrollInProgress) {
         snapshotFlow {
             gridState.isScrollInProgress
