@@ -71,8 +71,8 @@
         android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="Prism"
+        android:roundIcon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         android:largeHeap="true"
         android:hardwareAccelerated="true"
@@ -89,9 +89,9 @@
 
         <activity-alias
             android:name=".Launcher_Prism"
-            android:label="@string/app_name"
+            android:label="Prism"
             android:icon="@mipmap/ic_launcher"
-            android:roundIcon="@mipmap/ic_launcher_round"
+            android:roundIcon="@mipmap/ic_launcher"
             android:targetActivity=".feature_node.presentation.main.MainActivity"
             android:exported="true"
             android:enabled="true">
@@ -107,9 +107,9 @@
 
         <activity-alias
             android:name=".Launcher_Gallery"
-            android:label="@string/app_name_gallery"
+            android:label="Prism"
             android:icon="@mipmap/ic_launcher"
-            android:roundIcon="@mipmap/ic_launcher_round"
+            android:roundIcon="@mipmap/ic_launcher"
             android:targetActivity=".feature_node.presentation.main.MainActivity"
             android:exported="true"
             android:enabled="false">
