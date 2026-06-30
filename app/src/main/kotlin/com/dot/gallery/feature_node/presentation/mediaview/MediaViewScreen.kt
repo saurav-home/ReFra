@@ -1237,123 +1237,117 @@ fun <T : Media> MediaViewScreen(
                     sheetState.animateTo(imageOnlyDetent)
                 }
             }
-            val bottomSheetAlpha by animateFloatAsState(
-                targetValue = if (showUI) 1f else 0f,
-                animationSpec = tween(DEFAULT_TOP_BAR_ANIMATION_DURATION),
-                label = "MediaViewActionsAlpha"
-            )
-            BottomSheet(
-                state = sheetState,
-                enabled = showUI && target != TARGET_TRASH && showInfo,
-                modifier = Modifier
-                    .graphicsLayer {
-                        alpha = bottomSheetAlpha
-                    }
-                    .fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    AnimatedVisibility(
-                        visible = currentMedia != null,
-                        enter = enterAnimation,
-                        exit = exitAnimation
-                    ) {
-                        val bottomBarFollowTheme = if (autoContrast) {
-                            !isBottomDark
-                        } else {
-                            !allowBlur
-                        }
-                        val surfaceContainer by animateColorAsState(
-                            targetValue = when {
-                                autoContrast && !isBottomDark -> Color.White.copy(0.5f)
-                                autoContrast -> Color.Black.copy(0.5f)
-                                bottomBarFollowTheme -> MaterialTheme.colorScheme.surfaceContainer.copy(
-                                    if (isDarkTheme) 0.5f else 0.8f
-                                )
-                                else -> Color.Black.copy(0.5f)
-                            },
-                            label = "BottomBarSurfaceContainer"
-                        )
-                        val backgroundModifier = if (!allowBlur) {
-                            Modifier.background(
-                                color = surfaceContainer,
-                                shape = RoundedCornerShape(100)
-                            )
-                        } else Modifier
-
-                        // We introduce a clean alpha fade animation linked to initialPageSetup
-                        // This prevents the pill from flickering/appearing early, without breaking the Vault lifecycle.
-                        val pillAlpha by animateFloatAsState(
-                            targetValue = if (initialPageSetup) 1f else 0f,
-                            animationSpec = tween(durationMillis = 200),
-                            label = "PillFlickerFix"
-                        )
-
-      Box(
-                modifier = Modifier
-                    .graphicsLayer {
-                        val progress = sheetState.progress(imageOnlyDetent, expandedDetent)
-                        alpha = (1f - progress) * pillAlpha
-                        translationY = bottomBarHeightDefault.toPx() * progress
-                    }
-                    .padding(
-                        bottom = bottomPadding + extraPaddingWithNavButtons + 16.dp
-                    )
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(100))
-                        .then(backgroundModifier)
-                        .hazeEffectScaled(
-                            state = LocalHazeState.current,
-                            style = HazeMaterials.ultraThin(
-                                containerColor = surfaceContainer
-                            )
-                        )
-                        .padding(horizontal = 8.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    MediaViewQuickBottomBar(
-                        currentMedia = currentMedia,
-                        showDeleteButton = !isReadOnly,
-                        enabled = showUI && sheetState.currentDetent == imageOnlyDetent,
-                        deleteMedia = deleteMedia,
-                        restoreMedia = restoreMedia,
-                        currentVault = currentVault,
-                        isImageDark = isBottomDark,
-                        autoContrast = autoContrast,
-                        onTrashConfirmed = {
-                            val trashedId = currentMedia?.id
-                            if (trashedId != null) {
-                                val newPending = pendingTrashIds + trashedId
-                                pendingTrashIds = newPending
-                                val state = mediaState.value
-                                val allItems = state.pagerMedia.ifEmpty { state.media }
-                                val remaining = allItems.count { it.id !in newPending }
-                                if (remaining <= 0 && !isStandalone) {
-                                    windowInsetsController.toggleSystemBars(show = true)
-                                    eventHandler.navigateUp()
-                                }
-                            }
-                        }
-                    )
+val bottomSheetAlpha by animateFloatAsState(
+            targetValue = if (showUI) 1f else 0f,
+            animationSpec = tween(DEFAULT_TOP_BAR_ANIMATION_DURATION),
+            label = "MediaViewActionsAlpha"
+        )
+        BottomSheet(
+            state = sheetState,
+            enabled = showUI && target != TARGET_TRASH && showInfo,
+            modifier = Modifier
+                .graphicsLayer {
+                    alpha = bottomSheetAlpha
                 }
-            }
+                .fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AnimatedVisibility(
+                    visible = currentMedia != null,
+                    enter = enterAnimation,
+                    exit = exitAnimation
+                ) {
+                    val bottomBarFollowTheme = if (autoContrast) {
+                        !isBottomDark
+                    } else {
+                        !allowBlur
+                    }
+                    val surfaceContainer by animateColorAsState(
+                        targetValue = when {
+                            autoContrast && !isBottomDark -> Color.White.copy(0.5f)
+                            autoContrast -> Color.Black.copy(0.5f)
+                            bottomBarFollowTheme -> MaterialTheme.colorScheme.surfaceContainer.copy(
+                                if (isDarkTheme) 0.5f else 0.8f
+                            )
+                            else -> Color.Black.copy(0.5f)
+                        },
+                        label = "BottomBarSurfaceContainer"
+                    )
+                    val backgroundModifier = if (!allowBlur) {
+                        Modifier.background(
+                            color = surfaceContainer,
+                            shape = RoundedCornerShape(100)
+                        )
+                    } else Modifier
+                    Box(
+                        modifier = Modifier
+                            .graphicsLayer {
+                                val progress = sheetState.progress(imageOnlyDetent, expandedDetent)
+                                alpha = 1f - progress
+                                translationY =
+                                    bottomBarHeightDefault.toPx() * progress
+                            }
+                            .padding(
+                                bottom = bottomPadding + extraPaddingWithNavButtons + 16.dp
+                            )
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(100))
+                                .then(backgroundModifier)
+                                .hazeEffectScaled(
+                                    state = LocalHazeState.current,
+                                    style = HazeMaterials.ultraThin(
+                                        containerColor = surfaceContainer
+                                    )
+                                )
+                                .padding(horizontal = 8.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            MediaViewQuickBottomBar(
+                                currentMedia = currentMedia,
+                                showDeleteButton = !isReadOnly,
+                                enabled = showUI && sheetState.currentDetent == imageOnlyDetent,
+                                deleteMedia = deleteMedia,
+                                restoreMedia = restoreMedia,
+                                currentVault = currentVault,
+                                isImageDark = isBottomDark,
+                                autoContrast = autoContrast,
+                                onTrashConfirmed = {
+                                    val trashedId = currentMedia?.id
+                                    if (trashedId != null) {
+                                        val newPending = pendingTrashIds + trashedId
+                                        pendingTrashIds = newPending
+                                        val state = mediaState.value
+                                        val allItems = state.pagerMedia.ifEmpty { state.media }
+                                        val remaining = allItems.count { it.id !in newPending }
+                                        if (remaining <= 0 && !isStandalone) {
+                                            windowInsetsController.toggleSystemBars(show = true)
+                                            eventHandler.navigateUp()
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
 
-            MediaViewSheetDetails(
-                albumsState = albumsState,
-                vaultState = vaultState,
-                metadataState = metadataState,
-                currentMedia = currentMedia,
-                restoreMedia = restoreMedia,
-                currentVault = currentVault,
-                motionPhotoState = motionPhotoState,
-            )
+                MediaViewSheetDetails(
+                    albumsState = albumsState,
+                    vaultState = vaultState,
+                    metadataState = metadataState,
+                    currentMedia = currentMedia,
+                    restoreMedia = restoreMedia,
+                    currentVault = currentVault,
+                    motionPhotoState = motionPhotoState,
+                )
+            }
         }
     }
-            }
+    }
