@@ -93,6 +93,29 @@ class MainActivity : AppCompatActivity() {
         setContent {
             StartupTracer.trace("MainActivity.firstComposition") {}
             GalleryTheme {
+                        // ---- PASTE THIS AT THE ABSOLUTE START OF YOUR THEME BLOCK ----
+        // 1. Get context and access a persistent settings file on launch
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val prefs = androidx.compose.runtime.remember { 
+            context.getSharedPreferences("app_settings", android.content.Context.MODE_PRIVATE) 
+        }
+
+        // 2. Check if this is the absolute first time launching
+        var showDragDropShowcase by androidx.compose.runtime.remember { 
+            androidx.compose.runtime.mutableStateOf(prefs.getBoolean("show_drag_drop_banner", true)) 
+        }
+
+        // 3. Force-show the modern premium banner over whatever screen loads first
+        if (showDragDropShowcase) {
+            com.dot.gallery.feature_node.presentation.common.components.DragAndDropIntroDialog(
+                onDismiss = {
+                    showDragDropShowcase = false
+                    // Save permanently so it never pops up again
+                    prefs.edit().putBoolean("show_drag_drop_banner", false).apply()
+                }
+            )
+        }
+        // ---- END OF PASTE ----
                 LaunchedEffect(Unit) {
                     StartupTracer.trace("MainActivity.firstFrame") {}
                     StartupTracer.dump()
