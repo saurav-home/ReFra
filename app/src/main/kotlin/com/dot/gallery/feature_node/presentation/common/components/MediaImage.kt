@@ -201,11 +201,11 @@ fun <T : Media> MediaImage(
             // 2. THE MULTI-FILE FIX: Build a proper ClipDescription so WhatsApp knows there are multiple files
             val mimeTypes = arrayOf("image/*", "video/*")
             val clipDescription = android.content.ClipDescription("Gallery Media", mimeTypes)
-            val clipData = ClipData(clipDescription, ClipData.Item(urisToSend.first()))
+            val clipData = android.content.ClipData(clipDescription, android.content.ClipData.Item(urisToSend.first()))
 
-            for (i in 1 until urisToSend.size) {
-                clipData.addItem(ClipData.Item(urisToSend[i]))
-            }
+        for (i in 1 until urisToSend.size) {
+            clipData.addItem(android.content.ClipData.Item(urisToSend[i]))
+        }
             
             // 3. THE VISUAL UX FIX: Draw a beautiful custom "Stack" shadow directly on a Canvas
             val stackShadow = object : View.DragShadowBuilder() {
