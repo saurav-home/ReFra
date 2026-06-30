@@ -254,9 +254,6 @@ fun <T : Media> MediaImage(
         }
     }
 } else null // Return null when unselected to let the grid handle smooth drag-to-select!
-                } else {
-                    { onItemSelect(media) } // Enter selection mode
-                }
             )
             .aspectRatio(aspectRatio)
             .then(modifier)
