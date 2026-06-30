@@ -1256,7 +1256,7 @@ fun <T : Media> MediaViewScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     AnimatedVisibility(
-                        visible = currentMedia != null,
+                        visible = currentMedia != null && initialPageSetup,
                         enter = enterAnimation,
                         exit = exitAnimation
                     ) {
