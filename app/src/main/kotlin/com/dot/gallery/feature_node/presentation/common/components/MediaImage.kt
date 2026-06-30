@@ -104,7 +104,7 @@ fun <T : Media> MediaImage(
     canClick: () -> Boolean,
     onMediaClick: (T) -> Unit,
     onItemSelect: (T) -> Unit,
-    selectedMediaUris: List<android.net.Uri> = emptyList(),
+    selectedMediaUris: () -> List<android.net.Uri> = { emptyList() },
 ) {
     val selector = LocalMediaSelector.current
     val cellState = LocalMediaCellState.current
@@ -191,74 +191,69 @@ fun <T : Media> MediaImage(
                         onMediaClick(media)
                     }
                 },
-                onLongClick = if (selectionState) {
-                    if (isSelected) {
-                        {
-                            if (selectedMedia.size <= 5) {
-                                // 1. Decide what to send
-                                val urisToSend = if (selectedMediaUris.isNotEmpty()) {
-                                    selectedMediaUris
-                                } else {
-                                    listOf(media.getUri())
-                                }
+                onLongClick = if (selectionState && isSelected) {
+    {
+        if (selectedMedia.size <= 5) {
+            // 1. Evaluate the Lambda at the exact moment of the drag
+            val uris = selectedMediaUris()
+            val urisToSend = if (uris.isNotEmpty()) uris else listOf(media.getUri())
 
-                                // 2. THE MULTI-FILE FIX: Build a proper ClipDescription so WhatsApp knows there are multiple files
-                                val mimeTypes = arrayOf("image/*", "video/*")
-                                val clipDescription = android.content.ClipDescription("Gallery Media", mimeTypes)
-                                val clipData = ClipData(clipDescription, ClipData.Item(urisToSend.first()))
+            // 2. THE MULTI-FILE FIX: Build a proper ClipDescription so WhatsApp knows there are multiple files
+            val mimeTypes = arrayOf("image/*", "video/*")
+            val clipDescription = android.content.ClipDescription("Gallery Media", mimeTypes)
+            val clipData = ClipData(clipDescription, ClipData.Item(urisToSend.first()))
 
-                                for (i in 1 until urisToSend.size) {
-                                    clipData.addItem(ClipData.Item(urisToSend[i]))
-                                }
-                                
-                                // 3. THE VISUAL UX FIX: Draw a beautiful custom "Stack" shadow directly on a Canvas
-                                val stackShadow = object : View.DragShadowBuilder() {
-                                    override fun onProvideShadowMetrics(outShadowSize: android.graphics.Point, outShadowTouchPoint: android.graphics.Point) {
-                                        outShadowSize.set(350, 350) // Canvas size
-                                        outShadowTouchPoint.set(175, 175) // Center exactly under your finger
-                                    }
+            for (i in 1 until urisToSend.size) {
+                clipData.addItem(ClipData.Item(urisToSend[i]))
+            }
+            
+            // 3. THE VISUAL UX FIX: Draw a beautiful custom "Stack" shadow directly on a Canvas
+            val stackShadow = object : View.DragShadowBuilder() {
+                override fun onProvideShadowMetrics(outShadowSize: android.graphics.Point, outShadowTouchPoint: android.graphics.Point) {
+                    outShadowSize.set(350, 350)
+                    outShadowTouchPoint.set(175, 175)
+                }
 
-                                    override fun onDrawShadow(canvas: android.graphics.Canvas) {
-                                        val paint = android.graphics.Paint().apply { isAntiAlias = true }
-                                        
-                                        // Draw the back card of the stack (Semi-transparent)
-                                        paint.color = android.graphics.Color.parseColor("#66000000")
-                                        canvas.drawRoundRect(android.graphics.RectF(30f, 30f, 320f, 320f), 40f, 40f, paint)
+                override fun onDrawShadow(canvas: android.graphics.Canvas) {
+                    val paint = android.graphics.Paint().apply { isAntiAlias = true }
+                    
+                    // Draw the back card of the stack
+                    paint.color = android.graphics.Color.parseColor("#66000000")
+                    canvas.drawRoundRect(android.graphics.RectF(30f, 30f, 320f, 320f), 40f, 40f, paint)
 
-                                        // Draw the front card of the stack
-                                        paint.color = android.graphics.Color.parseColor("#AA000000")
-                                        val frontRect = android.graphics.RectF(10f, 10f, 340f, 340f)
-                                        canvas.drawRoundRect(frontRect, 40f, 40f, paint)
+                    // Draw the front card of the stack
+                    paint.color = android.graphics.Color.parseColor("#AA000000")
+                    val frontRect = android.graphics.RectF(10f, 10f, 340f, 340f)
+                    canvas.drawRoundRect(frontRect, 40f, 40f, paint)
 
-                                        // Draw the bold text in the center
-                                        paint.color = android.graphics.Color.WHITE
-                                        paint.textSize = 65f
-                                        paint.textAlign = android.graphics.Paint.Align.CENTER
-                                        paint.typeface = android.graphics.Typeface.DEFAULT_BOLD
-                                        
-                                        val text = if (urisToSend.size == 1) "1 Item" else "${urisToSend.size} Items"
-                                        val textY = frontRect.centerY() - (paint.descent() + paint.ascent()) / 2
-                                        canvas.drawText(text, frontRect.centerX(), textY, paint)
-                                    }
-                                }
+                    // Draw the bold text in the center
+                    paint.color = android.graphics.Color.WHITE
+                    paint.textSize = 65f
+                    paint.textAlign = android.graphics.Paint.Align.CENTER
+                    paint.typeface = android.graphics.Typeface.DEFAULT_BOLD
+                    
+                    val text = if (urisToSend.size == 1) "1 Item" else "${urisToSend.size} Items"
+                    val textY = frontRect.centerY() - (paint.descent() + paint.ascent()) / 2
+                    canvas.drawText(text, frontRect.centerX(), textY, paint)
+                }
+            }
 
-                                view.startDragAndDrop(
-                                    clipData,
-                                    stackShadow, 
-                                    null,
-                                    View.DRAG_FLAG_GLOBAL or View.DRAG_FLAG_GLOBAL_URI_READ
-                                )
-                                
-                            } else {
-                                // Show the limit warning
-                                android.widget.Toast.makeText(
-                                    context,
-                                    "You can't share more than 5 items at once",
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    } else null // Do nothing if long-pressing an unselected item during selection mode
+            view.startDragAndDrop(
+                clipData,
+                stackShadow, 
+                null,
+                View.DRAG_FLAG_GLOBAL or View.DRAG_FLAG_GLOBAL_URI_READ
+            )
+        } else {
+            // Show the limit warning
+            android.widget.Toast.makeText(
+                context,
+                "You can't share more than 5 items at once",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+} else null // Return null when unselected to let the grid handle smooth drag-to-select!
                 } else {
                     { onItemSelect(media) } // Enter selection mode
                 }
