@@ -188,7 +188,7 @@ fun AppBarContainer(
                     GooglePhotosNavigationPill(
                         navController = navController,
                         navItems = bottomNavItems,
-                        currentBackStackEntry = backStackEntry.value
+                        currentBackStackEntry = backStackEntry
                     )
                 }
                 
