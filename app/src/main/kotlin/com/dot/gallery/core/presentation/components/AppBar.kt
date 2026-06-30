@@ -178,9 +178,7 @@ fun AppBarContainer(
         )
         // Material (new) navbar: floating bar
         AnimatedVisibility(
-            modifier = Modifier.
-                .align(Alignment.BottomEnd)
-                .padding(bottom = rememberBottomBarInset(paddingValues)),
+            modifier = Modifier.align(Alignment.BottomEnd).padding(bottom = rememberBottomBarInset(paddingValues)),
             visible = showMaterialNavbar,
             enter = slideInVertically { it * 2 },
             exit = slideOutVertically { it * 2 }
@@ -190,199 +188,20 @@ fun AppBarContainer(
                 navItems = bottomNavItems,
                 currentBackStackEntry = backStackEntry
             )
-        }   
-            }
-        )
+        }
     }
 }
 
 private fun navigate(navController: NavController, route: String) {
     navController.navigate(route) {
-        // Pop up to the start destination of the graph to
-        // avoid building up a large stack of destinations
-        // on the back stack as users select items
         popUpTo(navController.graph.findStartDestination().id) {
             saveState = true
         }
-        // Avoid multiple copies of the same destination when
-        // reselecting the same item
         launchSingleTop = true
-        // Restore state when reselecting a previously selected item
         restoreState = true
     }
 }
 
-@Composable
-fun GalleryNavBar(
-    modifier: Modifier,
-    backStackEntry: NavBackStackEntry?,
-    navigationItems: List<NavigationItem>,
-    onClick: (route: String) -> Unit,
-) {
-    val allowBlur by rememberAllowBlur()
-    val surfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-    val backgroundModifier = remember (allowBlur) {
-        if (!allowBlur) {
-            Modifier.background(
-                color = surfaceColor,
-                shape = RoundedCornerShape(100)
-            )
-        } else {
-            Modifier
-        }
-    }
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 32.dp, vertical = 32.dp)
-            .then(modifier)
-            .height(64.dp)
-            .clip(RoundedCornerShape(100))
-            .then(backgroundModifier)
-            .hazeEffect(
-                state = LocalHazeState.current,
-                style = LocalHazeStyle.current
-            ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        navigationItems.forEach { item ->
-            val selected = remember(item, backStackEntry) {
-                item.route == backStackEntry?.destination?.route
-            }
-            GalleryNavBarItem(
-                navItem = item,
-                isSelected = selected,
-                onClick = onClick
-            )
-        }
-    }
-}
-
-@Stable
-@Composable
-private fun Label(item: NavigationItem) = Text(
-    text = item.name,
-    fontWeight = FontWeight.Medium,
-    style = MaterialTheme.typography.bodyMedium,
-)
-
-@Stable
-@Composable
-private fun Icon(item: NavigationItem) = Icon(
-    imageVector = item.icon,
-    contentDescription = item.name,
-)
-
-@Composable
-fun ClassicNavBar(
-    backStackEntry: NavBackStackEntry?,
-    navigationItems: List<NavigationItem>,
-    onClick: (route: String) -> Unit
-) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
-    ) {
-        navigationItems.forEach { item ->
-            val selected = item.route == backStackEntry?.destination?.route
-            NavigationBarItem(
-                selected = selected,
-                colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                ),
-                onClick = {
-                    if (!selected) {
-                        onClick(item.route)
-                    }
-                },
-                label = { Label(item) },
-                icon = { Icon(item) }
-            )
-        }
-    }
-}
-
-@Composable
-private fun ClassicNavigationRail(
-    backStackEntry: NavBackStackEntry?,
-    navigationItems: List<NavigationItem>,
-    onClick: (route: String) -> Unit
-) {
-    NavigationRail(
-        containerColor = MaterialTheme.colorScheme.surface
-    ) {
-        Spacer(Modifier.weight(1f))
-        navigationItems.forEach { item ->
-            val selected = item.route == backStackEntry?.destination?.route
-            NavigationRailItem(
-                selected = selected,
-                colors = NavigationRailItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                    selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                ),
-                onClick = {
-                    if (!selected) {
-                        onClick(item.route)
-                    }
-                },
-                label = { Label(item) },
-                icon = { Icon(item) }
-            )
-        }
-        Spacer(Modifier.weight(1f))
-    }
-
-}
-
-@Composable
-fun RowScope.GalleryNavBarItem(
-    navItem: NavigationItem,
-    isSelected: Boolean,
-    onClick: (route: String) -> Unit,
-) {
-    val mutableInteraction = remember { MutableInteractionSource() }
-    val selectedColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
-        label = "selectedColor"
-    )
-    val selectedIconColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-        label = "selectedIconColor"
-    )
-    Box(
-        modifier = Modifier
-            .height(64.dp)
-            .weight(1f)
-            // Dummy clickable to intercept clicks from passing under the container
-            .clickable(
-                indication = null,
-                interactionSource = mutableInteraction,
-                onClick = {}
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .height(32.dp)
-                .width(64.dp)
-                .background(
-                    color = selectedColor,
-                    shape = RoundedCornerShape(percent = 100)
-                )
-                .clip(RoundedCornerShape(100))
-                .clickable { if (!isSelected) onClick(navItem.route) },
-        )
-        Icon(
-            modifier = Modifier
-                .size(22.dp),
-            imageVector = navItem.icon,
-            contentDescription = navItem.name,
-            tint = selectedIconColor
-        )
-    }
-}
 @Composable
 fun GooglePhotosNavigationPill(
     navController: androidx.navigation.NavController,
@@ -390,86 +209,88 @@ fun GooglePhotosNavigationPill(
     currentBackStackEntry: androidx.navigation.NavBackStackEntry?
 ) {
     val currentRoute = currentBackStackEntry?.destination?.route
+
+    androidx.compose.foundation.layout.Row(
+        modifier = androidx.compose.ui.Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+    ) {
+        // Main Pill Box Container
         androidx.compose.foundation.layout.Row(
             modifier = androidx.compose.ui.Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f))
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
         ) {
-            // Main Pill Box Container
-            androidx.compose.foundation.layout.Row(
-                modifier = androidx.compose.ui.Modifier
-                    .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f))
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp)
-            ) {
-                navItems.forEach { item ->
-                    val isSelected = currentRoute == item.route
-                    
-                    androidx.compose.foundation.layout.Row(
-                        modifier = androidx.compose.ui.Modifier
-                            .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.primaryContainer 
-                                else androidx.compose.ui.graphics.Color.Transparent
-                            )
-                            .androidx.compose.foundation.clickable(
-                                interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                if (currentRoute != item.route) {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+            navItems.forEach { item ->
+                val isSelected = currentRoute == item.route
+                
+                androidx.compose.foundation.layout.Row(
+                    modifier = androidx.compose.ui.Modifier
+                        .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primaryContainer 
+                            else androidx.compose.ui.graphics.Color.Transparent
+                        )
+                        .androidx.compose.foundation.clickable(
+                            interactionSource = androidx.compose.runtime.remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            if (currentRoute != item.route) {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             }
-                            .padding(horizontal = if (isSelected) 18.dp else 14.dp, vertical = 10.dp),
-                        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-                    ) {
-                        if (isSelected) {
-                            androidx.compose.material3.Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.name,
-                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = androidx.compose.ui.Modifier.size(18.dp)
-                            )
-                            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.width(8.dp))
                         }
-                        
-                        androidx.compose.material3.Text(
-                            text = item.name,
-                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer 
-                                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Medium,
-                            fontSize = 14.androidx.compose.ui.unit.sp
+                        .padding(horizontal = if (isSelected) 18.dp else 14.dp, vertical = 10.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+                ) {
+                    if (isSelected) {
+                        androidx.compose.material3.Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.name,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = androidx.compose.ui.Modifier.size(18.dp)
                         )
+                        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.width(8.dp))
                     }
+                    
+                    androidx.compose.material3.Text(
+                        text = item.name,
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer 
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Medium,
+                        fontSize = 14.androidx.compose.ui.unit.sp
+                    )
                 }
             }
-            
-            // Floating Utility Button on the right
-            androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.width(8.dp))
-            androidx.compose.foundation.layout.Box(
-                modifier = androidx.compose.ui.Modifier
-                    .size(48.dp)
-                    .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f))
-                    .androidx.compose.foundation.clickable {
-                        navController.navigate(com.dot.gallery.feature_node.presentation.util.Screen.SearchScreen.route)
-                    },
-                contentAlignment = androidx.compose.ui.Alignment.Center
-            ) {
-                androidx.compose.material3.Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Rounded.Search,
-                    contentDescription = "Search",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = androidx.compose.ui.Modifier.size(22.dp)
-                )
-            }
         }
+        
+        // Floating Utility Button on the right
+        androidx.compose.foundation.layout.Spacer(modifier = androidx.compose.ui.Modifier.width(8.dp))
+        androidx.compose.foundation.layout.Box(
+            modifier = androidx.compose.ui.Modifier
+                .size(48.dp)
+                .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f))
+                .androidx.compose.foundation.clickable {
+                    navController.navigate(com.dot.gallery.feature_node.presentation.util.Screen.SearchScreen.route)
+                },
+            contentAlignment = androidx.compose.ui.Alignment.Center
+        ) {
+            androidx.compose.material3.Icon(
+                imageVector = androidx.compose.material.icons.Icons.Rounded.Search,
+                contentDescription = "Search",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = androidx.compose.ui.Modifier.size(22.dp)
+            )
+        }
+    }
+}
