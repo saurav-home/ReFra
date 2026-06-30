@@ -69,7 +69,6 @@ private const val DETAIL_TRASH = "trash"
 private const val DETAIL_TRASH_CONFIRM = "trash_confirm"
 private const val DETAIL_SECURE = "secure"
 private const val DETAIL_VIBRATIONS = "vibrations"
-private const val DETAIL_APP_NAME = "app_name"
 private const val DETAIL_VAULT_ENCRYPT = "vault_encrypt"
 
 @Composable
@@ -83,7 +82,6 @@ fun SettingsGeneralScreen() {
     var trashConfirmationEnabled by rememberTrashConfirmationEnabled()
     var secureMode by Settings.Misc.rememberSecureMode()
     var allowVibrations by Settings.Misc.rememberAllowVibrations()
-    var appNameAlias by rememberAppNameAlias()
     var vaultEncryptBehavior by Settings.Vault.rememberVaultEncryptBehavior()
 
     when (detailKey) {
@@ -122,26 +120,6 @@ fun SettingsGeneralScreen() {
                 isChecked = allowVibrations,
                 onCheckedChange = { allowVibrations = it },
                 description = stringResource(R.string.allow_vibrations_description),
-            )
-        }
-        DETAIL_APP_NAME -> {
-            BackHandler { detailKey = null }
-            ChooserPreferenceDetailScreen(
-                title = stringResource(R.string.change_app_name),
-                description = stringResource(R.string.app_name_description),
-                preview = { AppNamePreview(appNameAlias) },
-                options = listOf(
-                    PreferenceOption(Settings.Misc.ALIAS_REFRA, Settings.Misc.ALIAS_REFRA, appNameAlias == Settings.Misc.ALIAS_REFRA),
-                    PreferenceOption(Settings.Misc.ALIAS_GALLERY, Settings.Misc.ALIAS_GALLERY, appNameAlias == Settings.Misc.ALIAS_GALLERY),
-                ),
-                onOptionSelected = {
-                    appNameAlias = it
-                    context.changeAppAlias(it)
-                    scope.launch {
-                        delay(300)
-                        context.restartApplication()
-                    }
-                },
             )
         }
         DETAIL_VAULT_ENCRYPT -> {
@@ -332,58 +310,6 @@ private fun SecureModePreview(isChecked: Boolean) {
                     contentDescription = null,
                     modifier = Modifier.size(40.dp),
                     tint = MaterialTheme.colorScheme.primary.copy(alpha = overlayAlpha)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AppNamePreview(currentAlias: String) {
-    val context = LocalContext.current
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        listOf(Settings.Misc.ALIAS_REFRA, Settings.Misc.ALIAS_GALLERY).forEach { alias ->
-            val selected = currentAlias == alias
-            val borderColor = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.outlineVariant
-            val containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            else Color.Transparent
-
-            Column(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .border(width = 2.dp, color = borderColor, shape = RoundedCornerShape(16.dp))
-                    .background(containerColor)
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Image(
-                    painter = rememberDrawablePainter(
-                        drawable = AppCompatResources.getDrawable(context, R.mipmap.ic_launcher_round)
-                    ),
-                    contentDescription = alias,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                )
-                Text(
-                    text = alias,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    textAlign = TextAlign.Center
-                )
-                Icon(
-                    imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = null,
-                    tint = if (selected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.outlineVariant,
-                    modifier = Modifier.size(24.dp)
                 )
             }
         }
