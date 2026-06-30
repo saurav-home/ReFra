@@ -1256,7 +1256,7 @@ fun <T : Media> MediaViewScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     AnimatedVisibility(
-                        visible = currentMedia != null && initialPageSetup,
+                        visible = currentMedia != null,
                         enter = enterAnimation,
                         exit = exitAnimation
                     ) {
@@ -1282,11 +1282,20 @@ fun <T : Media> MediaViewScreen(
                                 shape = RoundedCornerShape(100)
                             )
                         } else Modifier
+
+                        // We introduce a clean alpha fade animation linked to initialPageSetup
+                        // This prevents the pill from flickering/appearing early, without breaking the Vault lifecycle.
+                        val pillAlpha by animateFloatAsState(
+                            targetValue = if (initialPageSetup) 1f else 0f,
+                            animationSpec = tween(durationMillis = 200),
+                            label = "PillFlickerFix"
+                        )
+
                         Box(
                             modifier = Modifier
                                 .graphicsLayer {
                                     val progress = sheetState.progress(imageOnlyDetent, expandedDetent)
-                                    alpha = 1f - progress
+                                    alpha = (1f - progress) * pillAlpha
                                     translationY =
                                         bottomBarHeightDefault.toPx() * progress
                                 }
@@ -1313,10 +1322,6 @@ fun <T : Media> MediaViewScreen(
                                 MediaViewQuickBottomBar(
                                     currentMedia = currentMedia,
                                     showDeleteButton = !isReadOnly,
-                                    // Only interactive while the action bar is actually visible
-                                    // (collapsed sheet). When the info panel is expanded the bar is
-                                    // faded out (alpha = 0) but would otherwise still be tappable,
-                                    // letting taps near the drag handle trigger hidden buttons.
                                     enabled = showUI && sheetState.currentDetent == imageOnlyDetent,
                                     deleteMedia = deleteMedia,
                                     restoreMedia = restoreMedia,
@@ -1328,7 +1333,6 @@ fun <T : Media> MediaViewScreen(
                                         if (trashedId != null) {
                                             val newPending = pendingTrashIds + trashedId
                                             pendingTrashIds = newPending
-                                            // If all items are now filtered out, navigate up
                                             val state = mediaState.value
                                             val allItems = state.pagerMedia.ifEmpty { state.media }
                                             val remaining = allItems.count { it.id !in newPending }
@@ -1354,7 +1358,3 @@ fun <T : Media> MediaViewScreen(
                     )
                 }
             }
-        }
-    }
-
-}
