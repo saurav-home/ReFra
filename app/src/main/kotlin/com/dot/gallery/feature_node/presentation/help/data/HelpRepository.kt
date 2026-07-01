@@ -207,10 +207,6 @@ object HelpRepository {
             icon = HelpIcon.ofVector(Icons.Outlined.Palette), category = HelpCategory.GET_STARTED_PERSONALIZATION,
             deepLink = Screen.SettingsAppearanceScreen(),
             pages = listOf(TutorialPage(title = R.string.help_tip_personalize_shared_elements_p1_title, description = R.string.help_tip_personalize_shared_elements_p1_desc, steps = listOf(R.string.help_tip_personalize_shared_elements_p1_s1, R.string.help_tip_personalize_shared_elements_p1_s2, R.string.help_tip_personalize_shared_elements_p1_s3))), sinceVersion = "4.0.0"),
-        HelpTip(id = "personalize_app_name", title = R.string.help_tip_personalize_app_name_title, subtitle = R.string.help_tip_personalize_app_name_subtitle,
-            icon = HelpIcon.ofVector(Icons.Outlined.Palette), category = HelpCategory.GET_STARTED_PERSONALIZATION,
-            deepLink = Screen.SettingsGeneralScreen(),
-            pages = listOf(TutorialPage(title = R.string.help_tip_personalize_app_name_p1_title, description = R.string.help_tip_personalize_app_name_p1_desc, steps = listOf(R.string.help_tip_personalize_app_name_p1_s1, R.string.help_tip_personalize_app_name_p1_s2, R.string.help_tip_personalize_app_name_p1_s3, R.string.help_tip_personalize_app_name_p1_s4))), sinceVersion = "4.1.1")
     )
     // endregion
 
